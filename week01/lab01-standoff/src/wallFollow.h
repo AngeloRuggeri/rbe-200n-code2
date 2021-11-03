@@ -1,6 +1,6 @@
 #include <PIDcontroller.h>
 
-class StandoffController
+class WallFollowController
 {
 public:
     float leftEffort = 0;
@@ -8,10 +8,11 @@ public:
 
 protected:
     float targetDistance = 50;
-    PIDController piStandoffer;
+
+    PIDController piWallFollow;
 
 public:
-    StandoffController(void) : piStandoffer(1, 0, 0) {} //TODO: edit gains
+    WallFollowController(void) : piWallFollow(1, 0, 0) {} //TODO: edit gains
 
     void processDistanceReading(float distance);
     void handleKeyPress(int16_t key);

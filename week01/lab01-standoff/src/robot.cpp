@@ -1,4 +1,5 @@
 #include "robot.h"
+#include "Chassis.h"
 
 // NOTE THAT MY IR KEYS AND CODES ARE DIFFERENT FROM YOURS!!! Add/adust as needed
 #include "ir_codes.h"
@@ -13,52 +14,69 @@ Robot::Robot(void)
 
 void Robot::init(void)
 {
+    delay(1000);
+    Serial.begin(115200);
     chassis.init();
-
+    mb_ez1.init();
     irDecoder.init(IR_PIN);
-    mb_ez1.init(USE_ECHO);  // TODO: use the sensor/method of your choice
+    //   mb_ez1.init(USE_ECHO);  // TODO: use the sensor/method of your choice
 }
 
-void Robot::loop() 
+void Robot::loop()
 {
     //check the IR remote
     int16_t keyCode = irDecoder.getKeyCode();
-    if(keyCode != -1) handleIRPress(keyCode);
+    if (keyCode != -1)
+        handleIRPress(keyCode);
 
-    //check the distance sensor
-    float distanceReading = 0;
-    bool hasNewReading = mb_ez1.getDistance(distanceReading);
-    if(hasNewReading) handleNewDistanceReading(distanceReading);
+    float distance = 0;
+    bool newReading = mb_ez1.getDistance(distance);
+
+    // && distance > 15 && distance < 80
+    if (newReading)
+        handleNewDistanceReading(distance);
 }
 
 void Robot::handleIRPress(int16_t key)
 {
     Serial.println(key);
-    if(key == MUTE)
+    if (key == NUM_2)
     {
         chassis.stop();
+        Serial.println("NUM 2");
         robotState = ROBOT_IDLE;
         return;
     }
 
-    switch(robotState)
+    switch (robotState)
     {
-        case ROBOT_IDLE:
-            if(key == BACK)
-            {
-                robotState = ROBOT_STANDOFF;
-            }
-            if(key == PREV)
-            {
-                robotState = ROBOT_WALL_FOLLOWING;
-            }
-            break;
-        case ROBOT_STANDOFF:
-            standoffController.handleKeyPress(key);
-            break;
-        //TODO: Add case for wall following
-        default:
-            break;
+    case ROBOT_IDLE:
+        if (key == NUM_4)
+        {
+            robotState = ROBOT_STANDOFF;
+            Serial.println("NUM 4");
+        }
+        if (key == NUM_3)
+        {
+            robotState = ROBOT_WALL_FOLLOWING;
+            Serial.println("NUM 3");
+        }
+        break;
+
+    case ROBOT_STANDOFF:
+        standoffController.handleKeyPress(key);
+        break;
+
+    case ROBOT_WALL_FOLLOWING:
+    {
+        wallFollowController.handleKeyPress(key);
+        Serial.println("WALL");
+        break;
+    }
+    break;
+
+    default:
+        break;
     }
 }
 
@@ -69,14 +87,18 @@ void Robot::handleNewDistanceReading(float distanceReading)
     Serial.print('\t');
     Serial.print(distanceReading);
     Serial.print('\t');
-    
-    //TODO: Add wall following behaviour
 
-    if(robotState == ROBOT_STANDOFF)
+    if (robotState == ROBOT_STANDOFF)
     {
         standoffController.processDistanceReading(distanceReading);
         chassis.setMotorEfforts(standoffController.leftEffort, standoffController.rightEffort);
-    }   
+    }
+
+    if (robotState == ROBOT_WALL_FOLLOWING)
+    {
+        wallFollowController.processDistanceReading(distanceReading);
+        chassis.setMotorEfforts(wallFollowController.leftEffort, wallFollowController.rightEffort);
+    }
 
     Serial.print('\n');
 }

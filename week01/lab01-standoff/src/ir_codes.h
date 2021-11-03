@@ -7,18 +7,25 @@
  * They are for an old TV remote that I use to test code.
  */
 
-#define CHplus      8
-#define CHminus     9
+#define PREV 5
+#define NEXT 13
+#define STOP 6
 
-#define VOLplus     6
-#define VOLminus    7
+#define VOLplus 2
+#define VOLminus 0
 
-#define NUM_0       16
-#define NUM_9       25
+#define NUM_0 12
 
-#define MUTE        40
+#define NUM_1 16
+#define NUM_2 17 //mute
+#define NUM_3 18 //prev
 
-#define PREV        32
-#define BACK        29
+#define NUM_4 20 //back
+#define NUM_5 21
+#define NUM_6 22
+
+#define NUM_7 24
+#define NUM_8 25
+#define NUM_9 26
 
 #endif
