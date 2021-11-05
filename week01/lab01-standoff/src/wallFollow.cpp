@@ -7,17 +7,17 @@ void WallFollowController::processDistanceReading(float distance)
     float error = distance - targetDistance;
     float effort = piWallFollow.ComputeEffort(error);
 
-    // Serial.print(distance);
+    Serial.print(distance);
 
-    // Serial.print('\t');
+    Serial.print('\t');
 
-    // Serial.print(targetDistance);
+    Serial.print(targetDistance);
 
-    // Serial.print('\t');
+    Serial.print('\t');
 
-    // Serial.print(error);
+    Serial.print(error);
 
-    // Serial.println("");
+    Serial.println("");
 
     if (error >= 5)
     {
