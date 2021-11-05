@@ -1,46 +1,126 @@
 #include "wallFollow.h"
 #include "ir_codes.h"
+#include "Chassis.h"
 
 void WallFollowController::processDistanceReading(float distance)
 {
-    float error = distance - targetDistance ;
+    float error = distance - targetDistance;
     float effort = piWallFollow.ComputeEffort(error);
 
-    leftEffort = effort;
-    rightEffort = effort;
+    // Serial.print(distance);
+
+    // Serial.print('\t');
 
     // Serial.print(targetDistance);
+
     // Serial.print('\t');
-    // Serial.print(distance);
-    // Serial.print('\t');
+
     // Serial.print(error);
-    // Serial.print('\t');
-    // Serial.print(effort);
-    // Serial.print('\t');
-    // Serial.print(leftEffort);
-    // Serial.print('\t');
-    // Serial.print(rightEffort);
-    // Serial.print('\t');
+
+    // Serial.println("");
+
+    if (error >= 5)
+    {
+        leftEffort = -(effort / 1.5);
+        rightEffort = -(effort);
+        // Serial.println("RIGHT");
+        // Serial.print('\t');
+        // Serial.print(leftEffort);
+        // Serial.print('\t');
+        // Serial.print(rightEffort);
+        // Serial.println("");
+    }
+
+    if (error <= -5)
+    {
+        leftEffort = effort;
+        rightEffort = (effort / 1.5);
+        // Serial.println("LEFT");
+        // Serial.print('\t');
+        // Serial.print(leftEffort);
+        // Serial.print('\t');
+        // Serial.print(rightEffort);
+        // Serial.println("");
+    }
+
+    else if (error > -5 && error < 5)
+    {
+//        Serial.println("AHHHHHHH");
+        leftEffort = -12;
+        rightEffort = -12;
+    }
 }
 
 void WallFollowController::handleKeyPress(int16_t key)
 {
-    switch(key)
+    switch (key)
     {
-        case PREV:
-            targetDistance += 10;
-            break;
 
-        case NEXT:
-            targetDistance -= 10;
-            break;
+    case STOP:
+        Serial.println("RESET");
+        targetDistance = 40;
+        break;
 
-        default:
-            if(key >= NUM_0 && key <= NUM_9)
-            {
-                
-                //TODO: implement wallFollow code
-            }
-            break;
+    case PREV:
+        Serial.println("PREV");
+        leftEffort += 10;
+        rightEffort += 10;
+
+        Serial.print(leftEffort);
+        Serial.print('\t');
+        Serial.print(rightEffort);
+        Serial.println("");
+
+        break;
+
+    case NEXT:
+        Serial.println("NEXT");
+        leftEffort -= 10;
+        rightEffort -= 10;
+
+        Serial.print(leftEffort);
+        Serial.print('\t');
+        Serial.print(rightEffort);
+        Serial.println("");
+
+        break;
+
+    default:
+
+        if (key == NUM_0)
+        {
+            targetDistance = targetDistance;
+            //           Serial.println(targetDistance);
+            processDistanceReading(targetDistance);
+        }
+
+        if (key >= NUM_1 && key <= NUM_3)
+        {
+
+            targetDistance += 10 * (key - 15);
+            //         Serial.println(targetDistance);
+            processDistanceReading(targetDistance);
+        }
+
+        if (key >= NUM_4 && key <= NUM_6)
+        {
+
+            targetDistance += 10 * (key - 16);
+            //        Serial.println(targetDistance);
+            processDistanceReading(targetDistance);
+        }
+
+        if (key >= NUM_7 && key <= NUM_9)
+        {
+            targetDistance += 10 * (key - 17);
+            //          Serial.println(targetDistance);
+            processDistanceReading(targetDistance);
+        }
+
+        else
+        {
+            processDistanceReading(targetDistance);
+        }
+        break;
     }
 }

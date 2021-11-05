@@ -7,7 +7,7 @@ public:
     float rightEffort = 0;
 
 protected:
-    float targetDistance = 50;
+    float targetDistance = 40;
 
     PIDController piWallFollow;
 

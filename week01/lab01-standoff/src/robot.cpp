@@ -30,16 +30,15 @@ void Robot::loop()
         handleIRPress(keyCode);
 
     float distance = 0;
+
     bool newReading = mb_ez1.getDistance(distance);
 
-    // && distance > 15 && distance < 80
     if (newReading)
         handleNewDistanceReading(distance);
 }
 
 void Robot::handleIRPress(int16_t key)
 {
-    Serial.println(key);
     if (key == NUM_2)
     {
         chassis.stop();
@@ -68,12 +67,8 @@ void Robot::handleIRPress(int16_t key)
         break;
 
     case ROBOT_WALL_FOLLOWING:
-    {
         wallFollowController.handleKeyPress(key);
-        Serial.println("WALL");
         break;
-    }
-    break;
 
     default:
         break;
@@ -83,10 +78,9 @@ void Robot::handleIRPress(int16_t key)
 void Robot::handleNewDistanceReading(float distanceReading)
 {
     //comment out after you verify this works
-    Serial.print(millis());
-    Serial.print('\t');
-    Serial.print(distanceReading);
-    Serial.print('\t');
+    // Serial.print(millis());
+    // Serial.print('\t');
+    //  Serial.println(distanceReading);
 
     if (robotState == ROBOT_STANDOFF)
     {
@@ -96,9 +90,8 @@ void Robot::handleNewDistanceReading(float distanceReading)
 
     if (robotState == ROBOT_WALL_FOLLOWING)
     {
+
         wallFollowController.processDistanceReading(distanceReading);
         chassis.setMotorEfforts(wallFollowController.leftEffort, wallFollowController.rightEffort);
     }
-
-    Serial.print('\n');
 }
