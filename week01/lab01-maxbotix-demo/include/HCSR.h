@@ -1,5 +1,5 @@
-#ifndef __MAXBOTIX_H
-#define __MAXBOTIX_H
+#ifndef __HCSR_H
+#define __HCSR_H
 
 /*
  * Datasheet: https://www.maxbotix.com/documents/LV-MaxSonar-EZ_Datasheet.pdf
@@ -10,12 +10,14 @@
 
 #define ECHO_RECD   0x02
 #define UART_RECD   0x04
+#define ADC_READ    0x08
 
 #define USE_CTRL_PIN    0x01
 #define USE_ECHO        0x02
 #define USE_UART        0x04
+#define USE_ADC         0x08
 
-class MaxBotix 
+class HCSR
 {
 private:
     uint8_t state = 0;
@@ -30,7 +32,8 @@ private:
 
     String serialString;
 public:
-    MaxBotix(void);  //ideally, this would take pins as parameters, but just hard-coded for now since we only have one
+
+    HCSR(void);  //ideally, this would take pins as parameters, but just hard-coded for now since we only have one
     void init(void);
     void init(uint8_t interfaces);
 
@@ -40,8 +43,7 @@ public:
     //Checks to see if a pulse echo has been registered
     uint16_t checkEcho(void);
 
-    //Checks/reads on the RS-232 interface
-    uint16_t readASCII(void);
+    //Reads the MCP3002 ADC; returns ADC result
 
     /**
      * TODO: Write a getDistance() function for the distance method of your choice.
@@ -54,6 +56,6 @@ public:
     void MB_ISR(void);
 };
 
-extern MaxBotix mb_ez1; 
+extern HCSR hc_ez1; 
 
 #endif
