@@ -19,7 +19,7 @@ void Robot::init(void)
     Serial.begin(115200);
     chassis.init();
     mb_ez1.init();
-    irDecoder.init(IR_PIN);
+    irDecoder.init();
     //   mb_ez1.init(USE_ECHO);  // TODO: use the sensor/method of your choice
 }
 
