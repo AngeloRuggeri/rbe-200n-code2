@@ -14,7 +14,7 @@ protected:
     WallFollowController wallFollowController;
     StandoffController standoffController;
 
-    enum ROBOT_STATE {ROBOT_IDLE, ROBOT_WALL_FOLLOWING, ROBOT_STANDOFF};
+    enum ROBOT_STATE {ROBOT_IDLE, ROBOT_WALL_FOLLOWING, ROBOT_STANDOFF, DRIVE_STRAIGHT, SPIN_CCW};
     ROBOT_STATE robotState = ROBOT_IDLE;
 
 public:

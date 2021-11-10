@@ -11,6 +11,8 @@
 #define NEXT 13
 #define STOP 6
 
+#define LEFT 8
+
 #define VOLplus 2
 #define VOLminus 0
 

@@ -39,6 +39,9 @@ void Robot::loop()
 
 void Robot::handleIRPress(int16_t key)
 {
+
+    Serial.print(key);
+
     if (key == NUM_2)
     {
         chassis.stop();
@@ -60,6 +63,20 @@ void Robot::handleIRPress(int16_t key)
             robotState = ROBOT_WALL_FOLLOWING;
             Serial.println("NUM 3");
         }
+
+        if (key == PREV)
+        {
+            robotState = DRIVE_STRAIGHT;
+            Serial.print("UP Button");
+        }
+
+        if (key == LEFT)
+        {
+            robotState = SPIN_CCW;
+            Serial.print("LEFT Button");
+
+        }
+
         break;
 
     case ROBOT_STANDOFF:
@@ -68,6 +85,14 @@ void Robot::handleIRPress(int16_t key)
 
     case ROBOT_WALL_FOLLOWING:
         wallFollowController.handleKeyPress(key);
+        break;
+
+    case DRIVE_STRAIGHT:
+        chassis.setWheelSpeeds(180, 180);
+        break;
+
+    case SPIN_CCW:
+        chassis.setWheelSpeeds(180, -180);
         break;
 
     default:
