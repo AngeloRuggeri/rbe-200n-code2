@@ -50,7 +50,7 @@ void Robot::handleIRPress(int16_t key)
         robotState = ROBOT_IDLE;
         return;
     }
-//check
+
     switch (robotState)
     {
     case ROBOT_IDLE:
