@@ -104,7 +104,7 @@ uint16_t MaxBotix::readMCP3002(bool force)
 
         //start the SPI session
         SPISettings spiSettings;
-        Serial.println(millis()); //defaults to (clk freq = 1000000, MSBFIRST, SPI_MODE0), which is what we want
+  //      Serial.println(millis()); //defaults to (clk freq = 1000000, MSBFIRST, SPI_MODE0), which is what we want
         SPI.beginTransaction(spiSettings);
          
 
@@ -120,7 +120,7 @@ uint16_t MaxBotix::readMCP3002(bool force)
 
         //close the SPI session
         SPI.endTransaction(); 
-        Serial.println(millis());
+   //     Serial.println(millis());
         retVal = ADCvalue;
     }
 

@@ -51,8 +51,15 @@ void Chassis::setTwist(float speed, float omega)
 	setWheelSpeeds(leftSp, rightSp);
 }
 
-void Chassis::updatePose(float leftDelta, float rightDelta) //parameters in degrees of wheel rotation
+void Chassis::updatePose(float leftDelta, float rightDelta, float deltaT) //parameters in degrees of wheel rotation
 {
+
+	float R = 0.14/2 * (rightDelta + leftDelta)/(rightDelta-leftDelta);
+	float D = ((leftDelta + rightDelta)/2) * 0.07 * PI * deltaT/1000 * 0.166666666666667 / 60;
+	float phi = D/R;
+	currPose.x = R * sin(phi) + currPose.x;
+	currPose.y = R- R * cos(phi) + currPose.y;
+	currPose.theta = phi - currPose.theta;
 	//TODO: update pose from actual wheel motion
 }
 
@@ -89,7 +96,7 @@ void Chassis::motorHandler(void)
 		rightMotor.process();
 
 		//here's where you'll update the pose in Lab 3, née 2
-		updatePose(leftMotor.getDelta(), rightMotor.getDelta());
+	//	updatePose(leftMotor.getDelta(), rightMotor.getDelta());
 
 		readyForUpdate = true;
 	}

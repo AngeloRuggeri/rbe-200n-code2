@@ -1,4 +1,5 @@
 #include <Chassis.h>
+#include <IRdecoder.h>
 
 #include "standoff.h"
 #include "wallFollow.h"
@@ -25,4 +26,8 @@ public:
 protected:
     void handleIRPress(int16_t);
     void handleNewDistanceReading(float);
+
+    Chassis chassis;
+    IRDecoder irDecoder = IRDecoder(15);
+
 };

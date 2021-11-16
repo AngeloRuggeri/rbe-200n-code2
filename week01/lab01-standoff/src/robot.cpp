@@ -40,12 +40,17 @@ void Robot::loop()
 
 void Robot::handleIRPress(int16_t key)
 {
+    static float timeBegin = 0.0;
 
-    Serial.print(key);
+ //   Serial.print(key);
 
     if (key == NUM_2)
     {
         chassis.stop();
+        float timeStop = millis();
+        float timePassed = timeStop - timeBegin;
+        chassis.updatePose(180, 180, timePassed);
+        chassis.writePose();
         Serial.println("NUM 2");
         robotState = ROBOT_IDLE;
         return;
@@ -67,6 +72,7 @@ void Robot::handleIRPress(int16_t key)
 
         if (key == PREV)
         {
+            timeBegin = millis();
             robotState = DRIVE_STRAIGHT;
             Serial.print("UP Button");
         }
@@ -89,11 +95,11 @@ void Robot::handleIRPress(int16_t key)
         break;
 
     case DRIVE_STRAIGHT:
-        chassis.setWheelSpeeds(180, 180);
+        chassis.setWheelSpeeds(-180, -180);
         break;
 
     case SPIN_CCW:
-        chassis.setWheelSpeeds(180, -180);
+        chassis.setWheelSpeeds(-180, 180);
         break;
 
     default:
