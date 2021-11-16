@@ -36,11 +36,16 @@ void Robot::loop()
     if (newReading)
         handleNewDistanceReading(distance);
 
-    if (chassis.checkDestination())
-    {
-        chassis.setMotorEfforts(0, 0);
-        Serial.println("AT DESTINATION");
-    }
+//     if (chassis.checkDestination())
+//     {
+//         chassis.setMotorEfforts(0, 0);
+//  //       Serial.println("AT DESTINATION");
+//     }
+
+
+
+    if (chassis.readyForUpdate)
+        handleChassisUpdate();
 }
 
 void Robot::handleIRPress(int16_t key)
@@ -64,24 +69,46 @@ void Robot::handleIRPress(int16_t key)
         if (key == NUM_0)
         {
             robotState = DRIVE_TO_POINT;
+            chassis.setDestination(0, 0);
             Serial.println("Drive to point");
         }
 
         if (key == NUM_1)
         {
-            robotState = ARC_90;
-            Serial.println("NUM 1");
+            robotState = DRIVE_TO_POINT;
+            chassis.setDestination(0.3, 0.3);
+            Serial.println("Drive to point");
+        }
+
+        if (key == NUM_2)
+        {
+            robotState = DRIVE_TO_POINT;
+            chassis.setDestination(0.6, 0);
+            Serial.println("Drive to point");
         }
 
         if (key == NUM_3)
         {
-            robotState = ROBOT_WALL_FOLLOWING;
-            Serial.println("NUM 3");
+            robotState = DRIVE_TO_POINT;
+            chassis.setDestination(0.3, -0.3);
+            Serial.println("Drive to point");
         }
-        if (key == NUM_4)
+
+        if (key == NUM_6)
+        {
+            robotState = ARC_90;
+            Serial.println("NUM 6");
+        }
+
+        if (key == NUM_7)
+        {
+            robotState = ROBOT_WALL_FOLLOWING;
+            Serial.println("NUM 7");
+        }
+        if (key == NUM_8)
         {
             robotState = ROBOT_STANDOFF;
-            Serial.println("NUM 4");
+            Serial.println("NUM 8");
         }
 
         if (key == PREV)
@@ -118,32 +145,6 @@ void Robot::handleIRPress(int16_t key)
         chassis.setWheelSpeeds(-115, -90);
         break;
 
-    case DRIVE_TO_POINT:
-
-        if (key == NUM_1)
-        {
-            chassis.driveToPoint(1);
-            Serial.println("30, 30");
-        }
-        if (key == NUM_2)
-        {
-            chassis.driveToPoint(2);
-            Serial.println("60, 0");
-        }
-
-        if (key == NUM_3)
-        {
-            chassis.driveToPoint(3);
-            Serial.println("30, -30");
-        }
-
-        if (key == NUM_0)
-        {
-            chassis.driveToPoint(0);
-            Serial.println("0, 0");
-        }
-        break;
-
     default:
         break;
     }
@@ -168,4 +169,15 @@ void Robot::handleNewDistanceReading(float distanceReading)
         wallFollowController.processDistanceReading(distanceReading);
         chassis.setMotorEfforts(wallFollowController.leftEffort, wallFollowController.rightEffort);
     }
+}
+
+void Robot::handleChassisUpdate(void)
+{
+    chassis.writePose();
+    chassis.readyForUpdate = 0;
+    if (robotState == DRIVE_TO_POINT)
+    {
+        chassis.driveToPoint();
+    }
+    Serial.print('\n');
 }
