@@ -55,10 +55,11 @@ public:
     void setMotorEfforts(float left, float right);
 
     void setTwist(float u, float omega);    //implementation left to the student
-    void updatePose(float, float, float);          //implementation left to the student
+    void updatePose(float, float);          //implementation left to the student
 
     void writePose(void);
 
-    void driveToPoint(void);                //implementation left to the student
+    void driveToPoint(int);                //implementation left to the student
     bool checkDestination(void);
+
 };

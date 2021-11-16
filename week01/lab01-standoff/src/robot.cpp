@@ -7,7 +7,6 @@
 #include <maxbotix.h>
 #include <IRdecoder.h>
 
-
 Robot::Robot(void)
 {
     //nothing to see here; move along...
@@ -36,22 +35,24 @@ void Robot::loop()
 
     if (newReading)
         handleNewDistanceReading(distance);
+
+    if (chassis.checkDestination())
+    {
+        chassis.setMotorEfforts(0, 0);
+        Serial.println("AT DESTINATION");
+    }
 }
 
 void Robot::handleIRPress(int16_t key)
 {
-    static float timeBegin = 0.0;
 
- //   Serial.print(key);
+    //   Serial.print(key);
 
-    if (key == NUM_2)
+    if (key == STOP)
     {
         chassis.stop();
-        float timeStop = millis();
-        float timePassed = timeStop - timeBegin;
-        chassis.updatePose(180, 180, timePassed);
         chassis.writePose();
-        Serial.println("NUM 2");
+        Serial.println("STOP");
         robotState = ROBOT_IDLE;
         return;
     }
@@ -59,20 +60,32 @@ void Robot::handleIRPress(int16_t key)
     switch (robotState)
     {
     case ROBOT_IDLE:
-        if (key == NUM_4)
+
+        if (key == NUM_0)
         {
-            robotState = ROBOT_STANDOFF;
-            Serial.println("NUM 4");
+            robotState = DRIVE_TO_POINT;
+            Serial.println("Drive to point");
         }
+
+        if (key == NUM_1)
+        {
+            robotState = ARC_90;
+            Serial.println("NUM 1");
+        }
+
         if (key == NUM_3)
         {
             robotState = ROBOT_WALL_FOLLOWING;
             Serial.println("NUM 3");
         }
+        if (key == NUM_4)
+        {
+            robotState = ROBOT_STANDOFF;
+            Serial.println("NUM 4");
+        }
 
         if (key == PREV)
         {
-            timeBegin = millis();
             robotState = DRIVE_STRAIGHT;
             Serial.print("UP Button");
         }
@@ -81,7 +94,6 @@ void Robot::handleIRPress(int16_t key)
         {
             robotState = SPIN_CCW;
             Serial.print("LEFT Button");
-
         }
 
         break;
@@ -100,6 +112,36 @@ void Robot::handleIRPress(int16_t key)
 
     case SPIN_CCW:
         chassis.setWheelSpeeds(-180, 180);
+        break;
+
+    case ARC_90:
+        chassis.setWheelSpeeds(-115, -90);
+        break;
+
+    case DRIVE_TO_POINT:
+
+        if (key == NUM_1)
+        {
+            chassis.driveToPoint(1);
+            Serial.println("30, 30");
+        }
+        if (key == NUM_2)
+        {
+            chassis.driveToPoint(2);
+            Serial.println("60, 0");
+        }
+
+        if (key == NUM_3)
+        {
+            chassis.driveToPoint(3);
+            Serial.println("30, -30");
+        }
+
+        if (key == NUM_0)
+        {
+            chassis.driveToPoint(0);
+            Serial.println("0, 0");
+        }
         break;
 
     default:

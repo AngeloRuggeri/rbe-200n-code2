@@ -32,9 +32,9 @@ MotorEncoded::~MotorEncoded()
  */
 bool MotorEncoded::attach(void)
 {
-	if(MotorBase::attach())
+	if (MotorBase::attach())
 	{
-		if(!encodersEnabled)
+		if (!encodersEnabled)
 		{
 			encodersEnabled = true;
 			ESP32Encoder::useInternalWeakPullResistors = UP;
@@ -46,7 +46,7 @@ bool MotorEncoded::attach(void)
 
 	// motor is not attached
 	return false;
-}	
+}
 
 /**
  * Sets the target speed in degrees/second.
@@ -60,7 +60,7 @@ void MotorEncoded::setTargetDegreesPerSecond(float dps)
 {
 	attach();
 
-	if(ctrlMode != CTRL_SPEED)
+	if (ctrlMode != CTRL_SPEED)
 	{
 		Serial.println("Resetting encoder");
 		resetEncoder(); //avoids jumps when engaging control algorithm
@@ -88,13 +88,15 @@ void MotorEncoded::process()
 	//update the encoder regardless of whether or not we're going to perform control
 	//this prevents jumps when changing control algorithms
 	currEncoder = encoder.getCount();
-	if(isReversed) currEncoder *= -1;
+	if (isReversed)
+		currEncoder *= -1;
 
-	if(ctrlMode == CTRL_SPEED)
+	currTicksPerInterval = currEncoder - prevEncoder;
+
+	prevEncoder = currEncoder;
+
+	if (ctrlMode == CTRL_SPEED)
 	{
-		currTicksPerInterval = currEncoder - prevEncoder;
-
-		prevEncoder = currEncoder;
 
 		float error = targetTicksPerInterval - currTicksPerInterval;
 		float effort = speedController.computeEffort(error);
