@@ -6,6 +6,9 @@
 
 #include <maxbotix.h>
 #include <IRdecoder.h>
+#include <Rangefinder.h>
+
+Rangefinder HC(17, 16);
 
 Robot::Robot(void)
 {
@@ -19,6 +22,7 @@ void Robot::init(void)
     chassis.init();
     mb_ez1.init();
     irDecoder.init();
+    HC.init(USE_ECHO | USE_CTRL_PIN);
     //   mb_ez1.init(USE_ECHO);  // TODO: use the sensor/method of your choice
 }
 
@@ -36,13 +40,22 @@ void Robot::loop()
     if (newReading)
         handleNewDistanceReading(distance);
 
-//     if (chassis.checkDestination())
-//     {
-//         chassis.setMotorEfforts(0, 0);
-//  //       Serial.println("AT DESTINATION");
-//     }
+    //     if (chassis.checkDestination())
+    //     {
+    //         chassis.setMotorEfforts(0, 0);
+    //  //       Serial.println("AT DESTINATION");
+    //     }
 
+    if (HC.getDistance(distance))
+    {
 
+        Serial.println(distance);
+        if (distance < 20)
+        {
+            Serial.println("CLOSE");
+            robotState = ROBOT_IDLE;
+        }
+    }
 
     if (chassis.readyForUpdate)
         handleChassisUpdate();
@@ -134,7 +147,7 @@ void Robot::handleIRPress(int16_t key)
         break;
 
     case DRIVE_STRAIGHT:
-        chassis.setWheelSpeeds(-180, -180);
+        chassis.setWheelSpeeds(180, 180);
         break;
 
     case SPIN_CCW:
@@ -173,11 +186,22 @@ void Robot::handleNewDistanceReading(float distanceReading)
 
 void Robot::handleChassisUpdate(void)
 {
+    static float distance;
     chassis.writePose();
     chassis.readyForUpdate = 0;
     if (robotState == DRIVE_TO_POINT)
     {
         chassis.driveToPoint();
+    }
+    if (HC.getDistance(distance))
+    {
+
+        Serial.println(distance);
+        if (distance < 20)
+        {
+            Serial.println("CLOSE");
+            robotState = ROBOT_IDLE;
+        }
     }
     Serial.print('\n');
 }

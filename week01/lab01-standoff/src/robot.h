@@ -29,5 +29,5 @@ protected:
 
     Chassis chassis;
     IRDecoder irDecoder = IRDecoder(15);
-
+    void handleChassisUpdate(void);
 };

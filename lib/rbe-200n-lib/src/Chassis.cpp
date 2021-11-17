@@ -6,11 +6,14 @@
  */
 
 Chassis::Chassis(void) : leftMotor(MOTOR_LEFT_PWM, MOTOR_LEFT_DIR, MOTOR_LEFT_ENCA, MOTOR_LEFT_ENCB),
-						 rightMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, MOTOR_RIGHT_ENCA, MOTOR_RIGHT_ENCB)
+						 rightMotor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_DIR, MOTOR_RIGHT_ENCA, MOTOR_RIGHT_ENCB), 
+						 distanceController(200, 12, 0), thetaController(30, 0, 0)
 {
 	//TODO: Set gains for speed control
 	//Either click into the MotorEncoded class and change the initializer in the
 	//constructor, or manually set the gains with the setter method: setPIDgains(...)
+	// leftMotor.setReverse(true);
+	// rightMotor.setReverse(true);
 }
 
 void Chassis::init(void)
@@ -42,10 +45,10 @@ void Chassis::setTwist(float speed, float omega)
 	float leftSp = 0;
 	float rightSp = 0;
 
-	Serial.print(leftSp);
-	Serial.print('\t');
-	Serial.print(rightSp);
-	Serial.print('\t');
+	// Serial.print(leftSp);
+	// Serial.print('\t');
+	// Serial.print(rightSp);
+	// Serial.print('\t');
 
 	setWheelSpeeds(leftSp, rightSp);
 }
@@ -60,60 +63,89 @@ void Chassis::updatePose(float leftDelta, float rightDelta) //parameters in degr
 	currPose.theta = (currPose.theta + newPose) / 2;
 	currPose.x = (currPose.x + (lD + rD) / 2 * cos(currPose.theta));
 	currPose.y = (currPose.y + (lD + rD) / 2 * sin(currPose.theta));
+
+	if (currPose.theta > 2 * PI)
+	{
+		currPose.theta -= 2 * PI;
+	}
+
+	else if (currPose.theta < -2 * PI)
+	{
+		currPose.theta += 2 * PI;
+	}
 }
 
 void Chassis::writePose(void)
 {
-	Serial.print(currPose.x * -100.00);
+	Serial.print(currPose.x * 100.00);
 	Serial.print('\t');
-	Serial.print(currPose.y * -100.00);
+	Serial.print(currPose.y * 100.00);
 	Serial.print('\t');
 	Serial.print(currPose.theta * (180 / PI));
 	Serial.print('\t');
 }
 
-void Chassis::driveToPoint(int p)
+void Chassis::setDestination(float x, float y)
 {
+	destPose.x = x;
+	destPose.y = y;
+	//destPose.theta = atan2(destPose.y - currPose.y, destPose.x - currPose.x);
+}
 
-	updatePose(leftMotor.getDelta(), rightMotor.getDelta());
+void Chassis::driveToPoint(void)
+{
+	// Serial.print(millis());
+	// Serial.print("\td2p\n");
 
-	if (p == 1)
+	float errorX = (destPose.x - currPose.x);
+	float errorY = (destPose.y - currPose.y);
+	float phi = atan2(errorY, errorX);
+
+	if (phi < 0)
 	{
-		destPose.x = -0.30;
-		destPose.y = -0.30;
+		phi += 2 * PI;
 	}
 
-	if (p == 2)
+	float errorTheta = phi - currPose.theta;
+
+	if (errorTheta > PI)
 	{
-		destPose.x = -0.60;
-		destPose.y = 0;
+		errorTheta -= 2 * PI;
 	}
 
-	if (p == 3)
+	if (errorTheta < -PI)
 	{
-		destPose.x = -0.30;
-		destPose.y = 0.30;
+		errorTheta += 2 * PI;
 	}
 
-	if (p == 0)
-	{
-		destPose.x = 0;
-		destPose.y = 0;
-	}
+	Serial.print("SOME TEXT");
+	Serial.print('\t');
+	Serial.print(currPose.theta);
+	Serial.print('\t');
+	Serial.print(phi);
+	Serial.print('\t');
+	Serial.print(errorTheta);
+	Serial.print('\t');
+	Serial.print(errorX);
+	Serial.print('\t');
+	Serial.print(errorY);
 
-	destPose.theta = atan((destPose.y - currPose.y) / (destPose.x - currPose.x));
-	float deltaDist = (-destPose.theta - currPose.theta) * 0.14 / 2;
-	float sumDist = -2 * (destPose.x - currPose.x) / cos(destPose.theta);
-	float rightDist = (deltaDist + sumDist) / 2;
-	float leftDist = (sumDist - rightDist);
-	float rightDeg = rightDist * (2 / 0.07) * (180 / PI);
-	float leftDeg = leftDist * (2 / 0.07) * (180 / PI);
-	float rightEffort = rightDeg / 35;
-	float leftEffort = leftDeg / 35;
+	float errorDistance = sqrt(errorX * errorX + errorY * errorY);
 
-	setMotorEfforts(-leftEffort + 1, -rightEffort);
+	// Serial.print(errorTheta);
+	// Serial.print('\t');
+	// Serial.print(errorDistance);
+	// Serial.print('\t');
 
-	//TODO: you'll need to add PID control here, both for distance and heading!
+	// PIDController(float p, float i = 0, float d = 0, float bound = 0) : Kp(p), Ki(i), Kd(d), errorBound(bound) {}
+
+	float effortDist = 200 * errorDistance;
+	float effortTheta = 30 * errorTheta;
+
+	float wheelSpeedL = effortDist - effortTheta;
+	float wheelSpeedR = effortDist + effortTheta;
+
+	setWheelSpeeds(wheelSpeedL, wheelSpeedR);
 }
 
 bool Chassis::checkDestination(void)
@@ -121,8 +153,7 @@ bool Chassis::checkDestination(void)
 
 	//currPose.x + 0.04 < destPose.x && currPose.x - 0.04 > destPose.x && currPose.y + 0.04 < destPose.y && currPose.y - 0.04 > destPose.y && currPose.theta + 6 < destPose.theta && currPose.theta - 6 > destPose.theta
 
-	if (currPose.x + 0.05 > destPose.x && currPose.x - 0.05 < destPose.x
-	&& currPose.y + 0.05 > destPose.y && currPose.y - 0.05 < destPose.y)
+	if (currPose.x + 0.04 > destPose.x && currPose.x - 0.04 < destPose.x && currPose.y + 0.04 > destPose.y && currPose.y - 0.04 < destPose.y)
 
 	{
 		return true;
@@ -145,26 +176,6 @@ void Chassis::motorHandler(void)
 
 		//here's where you'll update the pose in Lab 3, née 2
 		updatePose(leftMotor.getDelta(), rightMotor.getDelta());
-
-		Serial.println("");
-		Serial.println("");
-		Serial.println("");
-		Serial.println("CURR POSE");
-
-		writePose();
-
-		Serial.println("");
-		Serial.println("");
-		Serial.println("");
-		Serial.println("DEST POSE");
-
-		Serial.print(destPose.x * -100.00);
-		Serial.print('\t');
-		Serial.print(destPose.y * -100.00);
-		Serial.print('\t');
-		Serial.print(destPose.theta * (180 / PI));
-		Serial.print('\t');
-		//		writePose();
 
 		readyForUpdate = true;
 	}
