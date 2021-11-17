@@ -1,5 +1,6 @@
 #include "robot.h"
 #include "Chassis.h"
+#include "BNO055.h"
 
 // NOTE THAT MY IR KEYS AND CODES ARE DIFFERENT FROM YOURS!!! Add/adust as needed
 #include "ir_codes.h"
@@ -9,6 +10,7 @@
 #include <Rangefinder.h>
 
 Rangefinder HC(17, 16);
+BNO055 imu;
 
 Robot::Robot(void)
 {
@@ -22,6 +24,7 @@ void Robot::init(void)
     chassis.init();
     mb_ez1.init();
     irDecoder.init();
+    imu.init(OPR_MODE_AMG, 21);
     HC.init(USE_ECHO | USE_CTRL_PIN);
     //   mb_ez1.init(USE_ECHO);  // TODO: use the sensor/method of your choice
 }
