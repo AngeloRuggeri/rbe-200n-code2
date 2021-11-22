@@ -36,6 +36,9 @@ void Robot::loop()
     if (keyCode != -1)
         handleIRPress(keyCode);
 
+    static long i = millis();
+    static int j = 0;
+
     float distance = 0;
 
     bool newReading = mb_ez1.getDistance(distance);
@@ -49,19 +52,31 @@ void Robot::loop()
     //  //       Serial.println("AT DESTINATION");
     //     }
 
-    if (HC.getDistance(distance))
-    {
+    // if (HC.getDistance(distance))
+    // {
 
-        Serial.println(distance);
-        if (distance < 20)
-        {
-            Serial.println("CLOSE");
-            robotState = ROBOT_IDLE;
-        }
-    }
+    //     Serial.println(distance);
+    //     if (distance < 20)
+    //     {
+    //         Serial.println("CLOSE");
+    //         robotState = ROBOT_IDLE;
+    //     }
+    // }
 
     if (chassis.readyForUpdate)
         handleChassisUpdate();
+
+    // && j < 200
+
+    if ((millis() - i) > 11)
+    {
+        //     Serial.print(millis());
+        Serial.print('\t');
+
+        handleIMUtimer();
+        i = millis();
+        j++;
+    }
 }
 
 void Robot::handleIRPress(int16_t key)
@@ -130,6 +145,7 @@ void Robot::handleIRPress(int16_t key)
         if (key == PREV)
         {
             robotState = DRIVE_STRAIGHT;
+
             Serial.print("UP Button");
         }
 
@@ -190,7 +206,7 @@ void Robot::handleNewDistanceReading(float distanceReading)
 void Robot::handleChassisUpdate(void)
 {
     static float distance;
-    chassis.writePose();
+    //   chassis.writePose();
     chassis.readyForUpdate = 0;
     if (robotState == DRIVE_TO_POINT)
     {
@@ -206,5 +222,33 @@ void Robot::handleChassisUpdate(void)
             robotState = ROBOT_IDLE;
         }
     }
-    Serial.print('\n');
+    //   Serial.print('\n');
+}
+
+void Robot::handleIMUtimer()
+{
+    vector<int16_t> acc = imu.readRawAcc();
+    float accX = acc[0]/1000.00;
+    float accY = acc[1]/1000.00;
+    float accZ = acc[2]/1000.00;
+
+    float obsPitch = atan2(accX, accZ) * 180/PI;
+
+    Serial.println(obsPitch);
+
+    vector<int16_t> gyro = imu.readRawGyro();
+
+    // Serial.print(accX);
+    // Serial.print('\t');
+    // Serial.print(accY);
+    // Serial.print('\t');
+    // Serial.print(accZ);
+    // Serial.print('\t');
+    // Serial.print('\t');
+    // Serial.print(gyro[0]);
+    // Serial.print('\t');
+    // Serial.print(gyro[1]);
+    // Serial.print('\t');
+    // Serial.print(gyro[2]);
+    // Serial.println("");
 }
