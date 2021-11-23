@@ -3,6 +3,8 @@
 
 void WallFollowController::processDistanceReading(float distance)
 {
+
+    float baseSpeed = 20;
     float error = targetDistance - distance;
     float effort = piWallFollow.ComputeEffort(error);
 
@@ -19,36 +21,39 @@ void WallFollowController::processDistanceReading(float distance)
 
     Serial.println("");
 
-    if (error >= 5)
-    {
-        leftEffort = (effort / 1.5);
-        rightEffort = (effort);
-        // Serial.println("RIGHT");
-        // Serial.print('\t');
-        // Serial.print(leftEffort);
-        // Serial.print('\t');
-        // Serial.print(rightEffort);
-        // Serial.println("");
-    }
+    leftEffort = baseSpeed - effort;
+    rightEffort = baseSpeed + effort;
 
-    if (error <= -5)
-    {
-        leftEffort = -effort;
-        rightEffort = -(effort / 1.5);
-        // Serial.println("LEFT");
-        // Serial.print('\t');
-        // Serial.print(leftEffort);
-        // Serial.print('\t');
-        // Serial.print(rightEffort);
-        // Serial.println("");
-    }
+//     if (error >= 5)
+//     {
+//         leftEffort = (effort / 1.5);
+//         rightEffort = (effort);
+//         // Serial.println("RIGHT");
+//         // Serial.print('\t');
+//         // Serial.print(leftEffort);
+//         // Serial.print('\t');
+//         // Serial.print(rightEffort);
+//         // Serial.println("");
+//     }
 
-    else if (error > -5 && error < 5)
-    {
-//        Serial.println("AHHHHHHH");
-        leftEffort = 10;
-        rightEffort = 10;
-    }
+//     if (error <= -5)
+//     {
+//         leftEffort = -effort;
+//         rightEffort = -(effort / 1.5);
+//         // Serial.println("LEFT");
+//         // Serial.print('\t');
+//         // Serial.print(leftEffort);
+//         // Serial.print('\t');
+//         // Serial.print(rightEffort);
+//         // Serial.println("");
+//     }
+
+//     else if (error > -5 && error < 5)
+//     {
+// //        Serial.println("AHHHHHHH");
+//         leftEffort = baseSpeed;
+//         rightEffort = baseSpeed;
+//     }
 }
 
 void WallFollowController::handleKeyPress(int16_t key)

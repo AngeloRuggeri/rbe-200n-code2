@@ -12,7 +12,7 @@ protected:
     PIDController piWallFollow;
 
 public:
-    WallFollowController(void) : piWallFollow(1, 0, 0) {} //TODO: edit gains
+    WallFollowController(void) : piWallFollow(0.05, 0.01, 0) {} //TODO: edit gains
 
     void processDistanceReading(float distance);
     void handleKeyPress(int16_t key);

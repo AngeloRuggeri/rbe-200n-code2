@@ -72,28 +72,16 @@ void Robot::loop()
     if (robotState == ROBOT_WALL_FOLLOWING)
     {
         handleIMUtimer();
-        static int prevState = 0;
-        static int currState = 0;
 
-        if (chassis.estimatedPitchAngle < -4)
+        if (chassis.estimatedPitchAngle < -6)
         {
             digitalWrite(33, HIGH);
-            prevState = currState;
-            currState = 1;
         }
 
         else if (chassis.estimatedPitchAngle > 0)
         {
             digitalWrite(33, LOW);
-            prevState = currState;
-            currState = 0;
         }
-
-        // if(prevState == 1 && currState == 0) {
-        //     Serial.println("AHHHHHH");
-        //     robotState = ROBOT_IDLE;
-        // }
-
     }
 }
 
