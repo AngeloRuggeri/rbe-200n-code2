@@ -42,6 +42,7 @@ protected:
 
 public:
     bool readyForUpdate = false;
+    float estimatedPitchAngle = 0;
 
 public:
     Chassis(void);
@@ -65,5 +66,4 @@ public:
 
     PIDController distanceController;
     PIDController thetaController;
-
 };

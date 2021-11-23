@@ -1,11 +1,11 @@
 #include "wallFollow.h"
 #include "ir_codes.h"
-#include "Chassis.h"
 
 void WallFollowController::processDistanceReading(float distance)
 {
-    float error = distance - targetDistance;
+    float error = targetDistance - distance;
     float effort = piWallFollow.ComputeEffort(error);
+
 
     Serial.print(distance);
 
@@ -21,8 +21,8 @@ void WallFollowController::processDistanceReading(float distance)
 
     if (error >= 5)
     {
-        leftEffort = -(effort / 1.5);
-        rightEffort = -(effort);
+        leftEffort = (effort / 1.5);
+        rightEffort = (effort);
         // Serial.println("RIGHT");
         // Serial.print('\t');
         // Serial.print(leftEffort);
@@ -33,8 +33,8 @@ void WallFollowController::processDistanceReading(float distance)
 
     if (error <= -5)
     {
-        leftEffort = effort;
-        rightEffort = (effort / 1.5);
+        leftEffort = -effort;
+        rightEffort = -(effort / 1.5);
         // Serial.println("LEFT");
         // Serial.print('\t');
         // Serial.print(leftEffort);
@@ -46,8 +46,8 @@ void WallFollowController::processDistanceReading(float distance)
     else if (error > -5 && error < 5)
     {
 //        Serial.println("AHHHHHHH");
-        leftEffort = -12;
-        rightEffort = -12;
+        leftEffort = 10;
+        rightEffort = 10;
     }
 }
 

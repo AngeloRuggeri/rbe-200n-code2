@@ -26,6 +26,7 @@ void Robot::init(void)
     irDecoder.init();
     imu.init(OPR_MODE_AMG, 21);
     HC.init(USE_ECHO | USE_CTRL_PIN);
+    pinMode(33, OUTPUT);
     //   mb_ez1.init(USE_ECHO);  // TODO: use the sensor/method of your choice
 }
 
@@ -66,16 +67,33 @@ void Robot::loop()
     if (chassis.readyForUpdate)
         handleChassisUpdate();
 
-    // && j < 200
+    //  (millis() - i) > 11 &&
 
-    if ((millis() - i) > 11)
+    if (robotState == ROBOT_WALL_FOLLOWING)
     {
-        //     Serial.print(millis());
-        Serial.print('\t');
-
         handleIMUtimer();
-        i = millis();
-        j++;
+        static int prevState = 0;
+        static int currState = 0;
+
+        if (chassis.estimatedPitchAngle < -4)
+        {
+            digitalWrite(33, HIGH);
+            prevState = currState;
+            currState = 1;
+        }
+
+        else if (chassis.estimatedPitchAngle > 0)
+        {
+            digitalWrite(33, LOW);
+            prevState = currState;
+            currState = 0;
+        }
+
+        // if(prevState == 1 && currState == 0) {
+        //     Serial.println("AHHHHHH");
+        //     robotState = ROBOT_IDLE;
+        // }
+
     }
 }
 
@@ -205,6 +223,7 @@ void Robot::handleNewDistanceReading(float distanceReading)
 
 void Robot::handleChassisUpdate(void)
 {
+
     static float distance;
     //   chassis.writePose();
     chassis.readyForUpdate = 0;
@@ -212,6 +231,7 @@ void Robot::handleChassisUpdate(void)
     {
         chassis.driveToPoint();
     }
+
     if (HC.getDistance(distance))
     {
 
@@ -228,27 +248,47 @@ void Robot::handleChassisUpdate(void)
 void Robot::handleIMUtimer()
 {
     vector<int16_t> acc = imu.readRawAcc();
-    float accX = acc[0]/1000.00;
-    float accY = acc[1]/1000.00;
-    float accZ = acc[2]/1000.00;
+    float accX = acc[0] / 1000.00;
+    float accY = acc[1] / 1000.00;
+    float accZ = acc[2] / 1000.00;
 
-    float obsPitch = atan2(accX, accZ) * 180/PI;
-
-    Serial.println(obsPitch);
+    float accPitch = atan2(-accX, accZ) * 180 / PI;
 
     vector<int16_t> gyro = imu.readRawGyro();
+    float gyroX = gyro[0];
+    float gyroY = gyro[1];
+    float gyroZ = gyro[2];
 
-    // Serial.print(accX);
+    float gyroPitch = chassis.estimatedPitchAngle + (gyroY - gyroBias) * 0.011 / 11.00;
+    float k = 0.5;
+    float e = 0.005;
+
+    chassis.estimatedPitchAngle = gyroPitch + k * (accPitch - gyroPitch);
+
+    gyroBias -= (e * 11 / 0.011) * (accPitch - gyroPitch);
+
+    // Serial.print(accPitch);
     // Serial.print('\t');
-    // Serial.print(accY);
+    // Serial.print(gyroPitch);
     // Serial.print('\t');
-    // Serial.print(accZ);
+    //   Serial.print(chassis.estimatedPitchAngle);
     // Serial.print('\t');
-    // Serial.print('\t');
-    // Serial.print(gyro[0]);
-    // Serial.print('\t');
-    // Serial.print(gyro[1]);
-    // Serial.print('\t');
-    // Serial.print(gyro[2]);
-    // Serial.println("");
+    // Serial.print(gyroBias);
+    Serial.println("");
+
+    /*
+     Serial.print(accX);
+     Serial.print('\t');
+     Serial.print(accY);
+     Serial.print('\t');
+     Serial.print(accZ);
+     Serial.print('\t');
+     Serial.print('\t');
+     Serial.print(gyroX);
+     Serial.print('\t');
+     Serial.print(gyroY);
+     Serial.print('\t');
+    Serial.print(gyroZ);
+     Serial.println("");
+     */
 }

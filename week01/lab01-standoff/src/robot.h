@@ -17,6 +17,7 @@ protected:
 
     enum ROBOT_STATE {ROBOT_IDLE, ROBOT_WALL_FOLLOWING, ROBOT_STANDOFF, DRIVE_STRAIGHT, SPIN_CCW, ARC_90, DRIVE_TO_POINT};
     ROBOT_STATE robotState = ROBOT_IDLE;
+    float gyroBias = 0;
 
 public:
     Robot(void);
