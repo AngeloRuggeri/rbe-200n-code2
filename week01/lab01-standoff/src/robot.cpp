@@ -72,15 +72,27 @@ void Robot::loop()
     if (robotState == ROBOT_WALL_FOLLOWING)
     {
         handleIMUtimer();
+        static int prevState = 0;
+        static int currState = 0;
 
         if (chassis.estimatedPitchAngle < -6)
         {
+            prevState = currState;
+            currState = 1;
             digitalWrite(33, HIGH);
         }
 
         else if (chassis.estimatedPitchAngle > 0)
         {
+            prevState = currState;
+            currState = 0;
             digitalWrite(33, LOW);
+
+            if (prevState == 1 && currState == 0)
+            {
+                chassis.setMotorEfforts(0, 0);
+                robotState = ROBOT_IDLE;
+            }
         }
     }
 }
